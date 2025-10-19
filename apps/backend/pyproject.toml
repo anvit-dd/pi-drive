@@ -1,0 +1,19 @@
+[project]
+name = "pidrive-backend"
+version = "0.1.0"
+description = "FastAPI backend for PiDrive"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "aiofiles",
+    "pydantic",
+    "python-dotenv",
+    "python-jose",
+    "starlette",
+    "uvicorn",
+    "python-multipart",
+    "pillow",
+    "pymupdf",
+    "cryptography",
+]

@@ -1,0 +1,62 @@
+services:
+  env-generator:
+    image: alpine:latest
+    command: >
+      sh -c "
+        apk add --no-cache openssl &&
+        mkdir -p /secrets &&
+        echo \"API_KEY=$$(openssl rand -hex 16)\" > /secrets/.env &&
+        echo \"JWT_SECRET=$$(openssl rand -base64 32)\" >> /secrets/.env &&
+        echo \"REFRESH_TOKEN_SECRET=$$(openssl rand -base64 32)\" >> /secrets/.env &&
+        echo \"FILES_MASTER_KEY=$$(openssl rand -base64 32)\" >> /secrets/.env &&
+        echo 'Secrets generated successfully'
+      "
+    volumes:
+      - secrets:/secrets
+
+  backend:
+    build:
+      context: ./apps/backend
+    image: pidrive-backend:latest
+    environment:
+      BASE_PATH: /app/data
+      ALLOWED_ORIGINS: "http://localhost:3000"
+    volumes:
+      - backend_data:/app/data
+      - secrets:/secrets:ro
+    ports:
+      - "8000:4000"
+    depends_on:
+      env-generator:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    command: sh -c "set -a && . /secrets/.env && set +a && python -m uvicorn main:app --host 0.0.0.0 --port 4000"
+
+  frontend:
+    build:
+      context: ./apps/frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://backend:4000
+        NEXT_PUBLIC_SITE_URL: http://localhost:3000
+        DATABASE_URL: "file:./prisma/prod.db"
+    image: pidrive-frontend:latest
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "file:./prisma/prod.db"
+      NEXT_PUBLIC_UPLOAD_SIZE_LIMIT_GB: "100"
+      NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
+      NEXT_PUBLIC_API_URL: "http://localhost:8000"
+      HOME: "/tmp"
+    volumes:
+      - frontend_db:/app/prisma
+      - secrets:/secrets:ro
+    restart: unless-stopped
+    command: sh -c "set -a && . /secrets/.env && export NEXT_PUBLIC_API_KEY=$$API_KEY && set +a && npx prisma db push --accept-data-loss --force-reset && node server.js"
+
+volumes:
+  backend_data:
+  frontend_db:
+  secrets:

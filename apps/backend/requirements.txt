@@ -1,0 +1,11 @@
+aiofiles
+fastapi
+pydantic
+python-dotenv
+python_jose
+starlette
+uvicorn
+python-multipart
+Pillow
+PyMuPDF
+cryptography

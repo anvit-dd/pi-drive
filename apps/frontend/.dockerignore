@@ -1,0 +1,9 @@
+node_modules
+.next
+README.md
+.gitignore
+.DS_Store
+.vscode
+.env
+.env.local
+.env.example

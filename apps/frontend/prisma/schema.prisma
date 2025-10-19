@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum DurationUnit {
+  SECONDS
+  MINUTES
+  HOURS
+  DAYS
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  password      String
+  provider      String         @default("local")
+  role          Role           @default(USER)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  refreshTokens RefreshToken[]
+  ShareItems    SharedItems[]
+
+  @@index([id])
+  @@index([email])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isRevoked Boolean  @default(false)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@index([token])
+}
+
+model SharedItems {
+  id            String       @id @default(uuid())
+  linkId        String       @unique
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemPath      String
+  isFile        Boolean     @default(true)
+  shareDuration Int
+  durationUnit  DurationUnit
+  password      String?
+  createdAt     DateTime     @default(now())
+  expiresAt     DateTime
+
+  @@index([id])
+}
