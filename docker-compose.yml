@@ -3,6 +3,8 @@ services:
     build:
       context: ./apps/backend
     image: pidrive-backend:latest
+    ports:
+      - "8000:4000"
     environment:
       BASE_PATH: /app/data
       ALLOWED_ORIGINS: "${SERVICE_URL_FRONTEND:-http://localhost:3000}"
@@ -13,6 +15,8 @@ services:
     command: sh -c "python3 generate_secrets.py && export $(cat /secrets/.env | xargs) && python -m uvicorn main:app --host 0.0.0.0 --port 4000"
 
   frontend:
+    ports:
+      - "3000:3000"
     build:
       context: ./apps/frontend
       args:
