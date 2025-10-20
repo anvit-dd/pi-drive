@@ -3,8 +3,6 @@ services:
     build:
       context: ./apps/backend
     image: pidrive-backend:latest
-    ports:
-      - "8000:4000"
     environment:
       BASE_PATH: /app/data
       ALLOWED_ORIGINS: "${SERVICE_URL_FRONTEND:-http://localhost:3000}"
@@ -21,8 +19,6 @@ services:
         NEXT_PUBLIC_API_URL: "http://backend:4000"
         NEXT_PUBLIC_SITE_URL: "${SERVICE_URL_FRONTEND:-http://localhost:3000}"
         DATABASE_URL: "file:./prisma/prod.db"
-    ports:
-      - "3000:3000"
     image: pidrive-frontend:latest
     depends_on:
       - backend
