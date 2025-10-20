@@ -9,8 +9,6 @@ services:
     volumes:
       - backend_data:/app/data
       - secrets:/secrets
-    ports:
-      - "8000:4000"
     restart: unless-stopped
     command: sh -c "python3 generate_secrets.py && set -a && . /secrets/.env && set +a && python -m uvicorn main:app --host 0.0.0.0 --port 4000"
 
@@ -24,8 +22,6 @@ services:
     image: pidrive-frontend:latest
     depends_on:
       - backend
-    ports:
-      - "3000:3000"
     environment:
       DATABASE_URL: "file:./prisma/prod.db"
       NEXT_PUBLIC_UPLOAD_SIZE_LIMIT_GB: "100"
