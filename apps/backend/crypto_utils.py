@@ -30,9 +30,9 @@ def _load_master_key() -> bytes:
     try:
         key = b64decode(key_b64)
     except Exception as e:
-        raise CryptoConfigError(f"Invalid base64 for FILES_MASTER_KEY: {e}")
+        raise CryptoConfigError(f"Invalid base64 for FILES_MASTER_KEY: {e}. Value length: {len(key_b64) if key_b64 else 0}")
     if len(key) != 32:
-        raise CryptoConfigError("FILES_MASTER_KEY must decode to 32 bytes (AES-256)")
+        raise CryptoConfigError(f"FILES_MASTER_KEY must decode to 32 bytes (AES-256), got {len(key)} bytes")
     return key
 
 
