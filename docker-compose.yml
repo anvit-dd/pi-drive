@@ -1,21 +1,4 @@
 services:
-  env-generator:
-    image: alpine:latest
-    command: >
-      sh -c "
-        set -e &&
-        apk add --no-cache openssl &&
-        mkdir -p /secrets &&
-        echo \"API_KEY=$$(openssl rand -hex 16)\" > /secrets/.env &&
-        echo \"JWT_SECRET=$$(openssl rand -base64 32)\" >> /secrets/.env &&
-        echo \"REFRESH_TOKEN_SECRET=$$(openssl rand -base64 32)\" >> /secrets/.env &&
-        echo \"FILES_MASTER_KEY=$$(openssl rand -base64 32)\" >> /secrets/.env &&
-        echo 'Secrets generated successfully' &&
-        exit 0
-      "
-    volumes:
-      - secrets:/secrets
-
   backend:
     build:
       context: ./apps/backend
@@ -25,14 +8,11 @@ services:
       ALLOWED_ORIGINS: "http://localhost:3000"
     volumes:
       - backend_data:/app/data
-      - secrets:/secrets:ro
+      - secrets:/secrets
     ports:
       - "8000:4000"
-    depends_on:
-      env-generator:
-        condition: service_completed_successfully
     restart: unless-stopped
-    command: sh -c "set -a && . /secrets/.env && set +a && python -m uvicorn main:app --host 0.0.0.0 --port 4000"
+    command: sh -c "python3 generate_secrets.py && set -a && . /secrets/.env && set +a && python -m uvicorn main:app --host 0.0.0.0 --port 4000"
 
   frontend:
     build:

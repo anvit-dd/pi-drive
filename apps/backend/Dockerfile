@@ -13,7 +13,7 @@ COPY . .
 RUN mkdir -p /app/data \
     && useradd -m -u 1000 appuser \
     && chown -R appuser:appuser /app
-USER appuser
+# USER appuser
 
 ENV BASE_PATH=/app/data
 EXPOSE 4000
