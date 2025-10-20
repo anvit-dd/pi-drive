@@ -3,13 +3,15 @@ services:
     image: alpine:latest
     command: >
       sh -c "
+        set -e &&
         apk add --no-cache openssl &&
         mkdir -p /secrets &&
         echo \"API_KEY=$$(openssl rand -hex 16)\" > /secrets/.env &&
         echo \"JWT_SECRET=$$(openssl rand -base64 32)\" >> /secrets/.env &&
         echo \"REFRESH_TOKEN_SECRET=$$(openssl rand -base64 32)\" >> /secrets/.env &&
         echo \"FILES_MASTER_KEY=$$(openssl rand -base64 32)\" >> /secrets/.env &&
-        echo 'Secrets generated successfully'
+        echo 'Secrets generated successfully' &&
+        exit 0
       "
     volumes:
       - secrets:/secrets
