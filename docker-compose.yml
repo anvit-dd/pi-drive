@@ -1,7 +1,5 @@
 services:
   backend:
-    ports:
-    - "8000:4000"
     build:
       context: ./apps/backend
     image: pidrive-backend:latest
@@ -15,8 +13,6 @@ services:
     command: sh -c "python3 generate_secrets.py && export $(cat /secrets/.env | xargs) && python -m uvicorn main:app --host 0.0.0.0 --port 4000"
 
   frontend:
-    ports:
-    - "3000:3000"
     build:
       context: ./apps/frontend
       args:
