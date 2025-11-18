@@ -56,12 +56,20 @@ const FileDisplay = React.memo(
 		isLoading: propIsLoading,
 		readOnly = false,
 		onOpenPreview,
+		isSharedView = false,
+		linkId,
+		userId,
+		password,
 	}: {
 		onNavigateToFolder?: (folderPath: string) => void;
 		items?: ContentItem[];
 		isLoading?: boolean;
 		readOnly?: boolean;
 		onOpenPreview?: (item: ContentItem) => void;
+		isSharedView?: boolean;
+		linkId?: string;
+		userId?: string;
+		password?: string;
 	} = {}) => {
 		const setCurrDir = useCurrentDir((state) => state.setDir);
 		const dirContents = useCurrentDirectoryItems((state) => state.items);
@@ -348,6 +356,10 @@ const FileDisplay = React.memo(
 									onItemClick={handleItemSelect}
 									onItemDoubleClick={handleDoubleClick}
 									onItemContextMenu={handleItemContextMenu}
+									isSharedView={isSharedView}
+									linkId={linkId}
+									userId={userId}
+									password={password}
 								/>
 							)}
 						</div>

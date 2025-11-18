@@ -11,6 +11,10 @@ interface FileGridViewProps {
   onItemClick: (e: React.MouseEvent, item: ContentItem) => void;
   onItemDoubleClick: (e: React.MouseEvent, item: ContentItem) => void;
   onItemContextMenu: (item: ContentItem) => void;
+  isSharedView?: boolean;
+  linkId?: string;
+  userId?: string;
+  password?: string;
 }
 
 export function FileGridView({
@@ -20,6 +24,10 @@ export function FileGridView({
   onItemClick,
   onItemDoubleClick,
   onItemContextMenu,
+  isSharedView = false,
+  linkId,
+  userId,
+  password,
 }: FileGridViewProps) {
   const isSelected = (item: ContentItem) =>
     [...selectedItems].some((itm) => itm.id === item.id);
@@ -40,6 +48,10 @@ export function FileGridView({
             onClick={(e) => onItemClick(e, item)}
             onDoubleClick={(e) => onItemDoubleClick(e, item)}
             onContextMenu={() => onItemContextMenu(item)}
+            isSharedView={isSharedView}
+            linkId={linkId}
+            userId={userId}
+            password={password}
           />
         ))
       ) : (

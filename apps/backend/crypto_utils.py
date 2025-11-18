@@ -30,9 +30,13 @@ def _load_master_key() -> bytes:
     try:
         key = b64decode(key_b64)
     except Exception as e:
-        raise CryptoConfigError(f"Invalid base64 for FILES_MASTER_KEY: {e}. Value length: {len(key_b64) if key_b64 else 0}")
+        raise CryptoConfigError(
+            f"Invalid base64 for FILES_MASTER_KEY: {e}. Value length: {len(key_b64) if key_b64 else 0}"
+        )
     if len(key) != 32:
-        raise CryptoConfigError(f"FILES_MASTER_KEY must decode to 32 bytes (AES-256), got {len(key)} bytes")
+        raise CryptoConfigError(
+            f"FILES_MASTER_KEY must decode to 32 bytes (AES-256), got {len(key)} bytes"
+        )
     return key
 
 
@@ -76,7 +80,9 @@ def read_header(path: Path) -> EncHeader:
     return EncHeader(salt=salt, iv=iv, plain_size=plain_size, file_size=file_size)
 
 
-async def encrypt_upload_to_file(upload_file, out_path: Path, chunk_size: int = 4 * 1024 * 1024) -> int:
+async def encrypt_upload_to_file(
+    upload_file, out_path: Path, chunk_size: int = 4 * 1024 * 1024
+) -> int:
     from os import urandom
 
     master = _load_master_key()
@@ -145,7 +151,9 @@ def decrypt_stream(path: Path, chunk_size: int = 1024 * 1024) -> Iterator[bytes]
         decryptor.finalize()
 
 
-def decrypt_stream_range(path: Path, start: int, end: int, chunk_size: int = 1024 * 1024) -> Iterator[bytes]:
+def decrypt_stream_range(
+    path: Path, start: int, end: int, chunk_size: int = 1024 * 1024
+) -> Iterator[bytes]:
     if start < 0 or end < start:
         raise ValueError("Invalid range")
     hdr = read_header(path)
@@ -165,7 +173,7 @@ def decrypt_stream_range(path: Path, start: int, end: int, chunk_size: int = 102
         e = min(pt_len, (end - produced) + 1)
         if s < e:
             yield pt[s:e]
-            emitted += (e - s)
+            emitted += e - s
         produced = next_produced
         if produced > end and emitted >= (end - start + 1):
             break
@@ -184,6 +192,7 @@ def ensure_encrypted_empty_file(path: Path) -> None:
     if path.exists():
         return
     from os import urandom
+
     master = _load_master_key()
     salt = urandom(SALT_LEN)
     iv = urandom(IV_LEN)

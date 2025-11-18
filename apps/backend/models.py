@@ -3,7 +3,9 @@ from pydantic import BaseModel, Field
 
 
 class DeleteItemsRequest(BaseModel):
-    items: list[str] | dict = Field(..., description="List of item paths or dict with items")
+    items: list[str] | dict = Field(
+        ..., description="List of item paths or dict with items"
+    )
 
 
 class RenameRequest(BaseModel):
@@ -12,12 +14,16 @@ class RenameRequest(BaseModel):
 
 
 class MoveItemsRequest(BaseModel):
-    items: list[str] | dict = Field(..., description="List of item paths or dict with items")
+    items: list[str] | dict = Field(
+        ..., description="List of item paths or dict with items"
+    )
     destination: str = Field(..., description="Destination directory path")
 
 
 class CopyItemsRequest(BaseModel):
-    items: list[str] | dict = Field(..., description="List of item paths or dict with items")
+    items: list[str] | dict = Field(
+        ..., description="List of item paths or dict with items"
+    )
     destination: str = Field(..., description="Destination directory path")
 
 

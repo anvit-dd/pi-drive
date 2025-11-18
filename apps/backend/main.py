@@ -10,14 +10,10 @@ from routes.directories import router as directories_router
 from routes.files import router as files_router
 from routes.operations import router as operations_router
 from routes.media import router as media_router
-from routes.shared import router as shared_router
+from routes.shares import router as shared_router
 
 
-app = FastAPI(
-    title=APP_TITLE,
-    version=APP_VERSION,
-    description=APP_DESCRIPTION
-)
+app = FastAPI(title=APP_TITLE, version=APP_VERSION, description=APP_DESCRIPTION)
 
 app.add_middleware(AuthMiddleware)
 
@@ -26,7 +22,7 @@ app.add_middleware(
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "DELETE", "PATCH", "PUT"],
-    allow_headers=["*"],
+    allow_headers=["authorization", "x-api-key", "range", "content-type", "accept"],
 )
 
 app.include_router(users_router)
@@ -35,7 +31,6 @@ app.include_router(files_router)
 app.include_router(operations_router)
 app.include_router(media_router)
 app.include_router(shared_router)
-
 
 
 if __name__ == "__main__":

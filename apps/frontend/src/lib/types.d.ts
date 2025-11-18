@@ -74,3 +74,13 @@ export interface ClipboardState {
 	) => void;
 	clearClipboard: () => void;
 }
+
+export interface ShareInfo {
+	itemPath: string;
+	sharedBy: string;
+	userId: string;
+	createdAt: string;
+	expiresAt: string;
+	requiresPassword: boolean;
+	isFile: boolean;
+}

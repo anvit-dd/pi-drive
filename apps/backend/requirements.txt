@@ -1,11 +1,11 @@
-aiofiles
 fastapi
+aiofiles
 pydantic
 python-dotenv
-python_jose
+python-jose
 starlette
 uvicorn
 python-multipart
-Pillow
-PyMuPDF
+pillow
 cryptography
+pypdfium2

@@ -17,8 +17,6 @@ export function useItemSelection({
       e.stopPropagation();
       const selectedItemsArr = [...selectedItems];
 
-      console.log("SELECTED")
-
       if (e.shiftKey) {
         if (selectedItemsArr.length === 0) {
           setSelectedItems(new Set([item]));
@@ -44,6 +42,7 @@ export function useItemSelection({
           setSelectedItems(new Set([...selectedItemsArr, item]));
         }
       } else {
+        
         setSelectedItems(new Set([item]));
       }
     },

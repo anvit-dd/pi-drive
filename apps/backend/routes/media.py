@@ -8,15 +8,14 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.background import BackgroundTasks
 from starlette.responses import FileResponse, StreamingResponse
 from PIL import Image
-import fitz
-
+import pypdfium2 as pdfium
 from config import BASE_PATH, VIDEO_FORMATS
-from utils import verify_incoming_path
+from utils import generate_pdf_thumbnail, verify_incoming_path
 from crypto_utils import (
     is_encrypted_file,
     decrypt_stream,
     decrypt_stream_range,
-    get_plaintext_size
+    get_plaintext_size,
 )
 
 router = APIRouter(prefix="/media")
@@ -55,7 +54,9 @@ async def stream_media(path: str, req: Request):
             range_end = file_size - 1
 
         if range_start >= file_size:
-            raise HTTPException(status_code=416, detail="Requested range not satisfiable")
+            raise HTTPException(
+                status_code=416, detail="Requested range not satisfiable"
+            )
 
         def iter_file(start, end):
             if is_encrypted_file(full_file_path):
@@ -80,7 +81,9 @@ async def stream_media(path: str, req: Request):
             "Content-Type": content_type,
         }
 
-        return StreamingResponse(iter_file(range_start, range_end), status_code=206, headers=headers)
+        return StreamingResponse(
+            iter_file(range_start, range_end), status_code=206, headers=headers
+        )
 
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
@@ -107,7 +110,7 @@ async def get_thumbnail(path: str, req: Request, background_tasks: BackgroundTas
 
         src_for_thumb = full_image_path
         tmp_to_cleanup: list[Path] = []
-        
+
         if is_encrypted_file(full_image_path):
             with NamedTemporaryFile(suffix=full_image_path.suffix, delete=False) as tmp:
                 tmp_path = Path(tmp.name)
@@ -121,21 +124,28 @@ async def get_thumbnail(path: str, req: Request, background_tasks: BackgroundTas
                 thumb_path = tmp_thumb.name
 
             ffmpeg_cmd = [
-                "ffmpeg", "-y",
-                "-i", str(src_for_thumb),
-                "-ss", "00:00:00.000",
-                "-vframes", "1",
-                "-vf", "scale=320:-1",
-                thumb_path
+                "ffmpeg",
+                "-y",
+                "-i",
+                str(src_for_thumb),
+                "-ss",
+                "00:00:00.000",
+                "-vframes",
+                "1",
+                "-vf",
+                "scale=320:-1",
+                thumb_path,
             ]
             proc = await asyncio.create_subprocess_exec(
                 *ffmpeg_cmd,
                 stdout=asyncio.subprocess.DEVNULL,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
             _, _ = await proc.communicate()
             if proc.returncode != 0 or not os.path.exists(thumb_path):
-                raise HTTPException(status_code=500, detail="Failed to generate thumbnail")
+                raise HTTPException(
+                    status_code=500, detail="Failed to generate thumbnail"
+                )
 
             for p in tmp_to_cleanup:
                 background_tasks.add_task(
@@ -149,7 +159,7 @@ async def get_thumbnail(path: str, req: Request, background_tasks: BackgroundTas
                 path=thumb_path,
                 media_type="image/jpeg",
                 headers={"Cache-Control": "public, max-age=3600"},
-                background=background_tasks
+                background=background_tasks,
             )
 
         elif src_for_thumb.suffix.lower() == ".pdf":
@@ -159,15 +169,7 @@ async def get_thumbnail(path: str, req: Request, background_tasks: BackgroundTas
             with NamedTemporaryFile(suffix=".png", delete=False) as tmp_thumb:
                 thumb_path = tmp_thumb.name
 
-            def generate_pdf_thumbnail():
-                pdf = fitz.open(src_for_thumb)
-                page = pdf[0]
-                pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
-                img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-                img.thumbnail((512, 512))
-                img.save(thumb_path, "PNG")
-
-            await asyncio.to_thread(generate_pdf_thumbnail)
+            await asyncio.to_thread(generate_pdf_thumbnail, src_for_thumb, thumb_path)
             for p in tmp_to_cleanup:
                 background_tasks.add_task(
                     lambda path=p: os.remove(path) if os.path.exists(path) else None
@@ -180,7 +182,7 @@ async def get_thumbnail(path: str, req: Request, background_tasks: BackgroundTas
                 path=thumb_path,
                 media_type="image/png",
                 headers={"Cache-Control": "public, max-age=3600"},
-                background=background_tasks
+                background=background_tasks,
             )
 
         if tmp_to_cleanup:
@@ -192,13 +194,13 @@ async def get_thumbnail(path: str, req: Request, background_tasks: BackgroundTas
                 path=str(tmp_path),
                 media_type="image/jpeg",
                 headers={"Cache-Control": "public, max-age=3600"},
-                background=background_tasks
+                background=background_tasks,
             )
 
         return FileResponse(
             path=str(full_image_path),
             media_type="image/jpeg",
-            headers={"Cache-Control": "public, max-age=3600"}
+            headers={"Cache-Control": "public, max-age=3600"},
         )
 
     except PermissionError as e:

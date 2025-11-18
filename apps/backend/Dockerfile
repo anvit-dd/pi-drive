@@ -1,20 +1,22 @@
-FROM jrottenberg/ffmpeg:latest AS ffmpeg
-FROM python:3.11-slim
+FROM python:3.11-alpine3.20
 
-COPY --from=ffmpeg /usr/local/bin/ffmpeg /usr/local/bin/ffmpeg
-COPY --from=ffmpeg /usr/local/bin/ffprobe /usr/local/bin/ffprobe
-COPY --from=ffmpeg /usr/local/lib/ /usr/local/lib/
-
+RUN apk add --no-cache ffmpeg
 WORKDIR /app
 COPY requirements.txt .
+
+ENV PIP_DEFAULT_TIMEOUT=121 \
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 RUN mkdir -p /app/data \
-    && useradd -m -u 1000 appuser \
-    && chown -R appuser:appuser /app
-# USER appuser
+        && adduser -D -u 1000 appuser \
+        && chown -R appuser:appuser /app
 
 ENV BASE_PATH=/app/data
 EXPOSE 4000
+USER appuser
 # CMD ["uvicorn","main:app","--host","0.0.0.0","--port","4000"]
