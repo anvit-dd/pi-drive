@@ -6,7 +6,7 @@ services:
       BASE_PATH: /app/data
       ALLOWED_ORIGINS: "${SERVICE_URL_FRONTEND:-http://localhost:3000}"
     volumes:
-      - /media/anvit/Drive/Pi-Drive:/app/data
+      - ~/Desktop:/app/data
       - secrets:/secrets
     restart: unless-stopped
     command: >
@@ -23,7 +23,7 @@ services:
       - backend
     environment:
       DATABASE_URL: "file:./prisma/prod.db"
-      NEXT_PUBLIC_UPLOAD_SIZE_LIMIT_GB: "1000"
+      NEXT_PUBLIC_UPLOAD_SIZE_LIMIT_GB: "100"
       NEXT_PUBLIC_SITE_URL: "${SERVICE_URL_FRONTEND:-http://localhost:3000}"
       NEXT_PUBLIC_API_URL: "http://backend:4000"
       HOME: "/tmp"
