@@ -1,12 +1,11 @@
 services:
   backend:
-    image: anvitdd/pidrive-backend:latest
-    pull_policy: always
+    build: ./apps/backend
     environment:
       BASE_PATH: /app/data
       ALLOWED_ORIGINS: "${SERVICE_URL_FRONTEND:-http://localhost:3000}"
     volumes:
-      - ~/Desktop:/app/data
+      - ./data:/app/data
       - secrets:/secrets
     restart: unless-stopped
     command: >
@@ -17,8 +16,7 @@ services:
       "
 
   pidrive:
-    image: anvitdd/pidrive-frontend:latest
-    pull_policy: always
+    build: ./apps/frontend
     depends_on:
       - backend
     environment:
@@ -31,9 +29,16 @@ services:
       - frontend_db:/app/prisma
       - secrets:/secrets:ro
     restart: unless-stopped
-    command: sh -c "set -a && . /secrets/.env && export NEXT_PUBLIC_API_KEY=$$API_KEY && set +a && npx prisma db push && node server.js"
+    command: >
+      sh -c "
+      set -a &&
+      . /secrets/.env &&
+      export NEXT_PUBLIC_API_KEY=$$API_KEY &&
+      set +a &&
+      npx prisma@6.16.3 db push --skip-generate &&
+      node server.js
+      "
 
 volumes:
-  backend_data:
   frontend_db:
   secrets:

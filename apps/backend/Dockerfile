@@ -13,10 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 RUN mkdir -p /app/data \
-        && adduser -D -u 1000 appuser \
-        && chown -R appuser:appuser /app
+    && adduser -D -u 1000 appuser \
+    && chown -R appuser:appuser /app
 
 ENV BASE_PATH=/app/data
 EXPOSE 4000
 USER appuser
-# CMD ["uvicorn","main:app","--host","0.0.0.0","--port","4000"]
