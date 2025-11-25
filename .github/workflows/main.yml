@@ -15,17 +15,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - uses: oven-sh/setup-bun@v1
         with:
-          node-version: "20"
-          cache: "npm"
-          cache-dependency-path: apps/frontend/package-lock.json
+          bun-version: latest
       - name: Install frontend dependencies
-        run: cd apps/frontend && npm ci
+        run: cd apps/frontend && bun install
       - name: Lint frontend
-        run: cd apps/frontend && npm run lint
+        run: cd apps/frontend && bun run lint
       - name: Build frontend
-        run: cd apps/frontend && npm run build
+        run: cd apps/frontend && bun run build
 
       - uses: actions/setup-python@v4
         with:
